@@ -11,7 +11,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Tự động nạp tất cả provider trong Modules
+        $modulesPath = base_path('Modules');
+        if (is_dir($modulesPath)) {
+            foreach (scandir($modulesPath) as $module) {
+                if ($module === '.' || $module === '..') continue;
+                $provider = "Modules\\{$module}\\Providers\\{$module}ServiceProvider";
+                $providerPath = $modulesPath . "/{$module}/Providers/{$module}ServiceProvider.php";
+                if (file_exists($providerPath)) {
+                    $this->app->register($provider);
+                }
+            }
+        }
     }
 
     /**
