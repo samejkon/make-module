@@ -96,23 +96,68 @@ class MakeModuleCommand extends Command
         $routeName = strtolower($name);
         $new_name = $routeName . 's';
 
-        $providerContent = "<?php\n\nnamespace Modules\\{$name}\\Providers;\n\nuse Illuminate\\Support\\ServiceProvider;\n\nclass {$name}ServiceProvider extends ServiceProvider\n{\n    /**\n     * Register the service provider.\n     *\n     * @return void\n     */\n    public function register()\n    {\n        \$this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');\n        \$this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');\n        \$this->loadViewsFrom(__DIR__ . '/../Resources/views', '{$routeName}'); // Tên view alias cũng nên là chữ thường
-        \$this->loadMigrationsFrom(__DIR__ . '/../database/migrations');\n        \$this->mergeConfigFrom(__DIR__ . '/../config/config.php', '{$routeName}');
-    }\n\n    /**\n     * Bootstrap services.\n     *\n     * @return void\n     */\n    public function boot()\n    {\n        //
-    }\n}\n";
+        $providerContent = <<<PHP
+<?php
+
+namespace Modules\\{$name}\\Providers;
+
+use Illuminate\\Support\\ServiceProvider;
+
+class {$name}ServiceProvider extends ServiceProvider
+{
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        // Nạp route, view, migration, config cho module
+        \$this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
+        \$this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
+        \$this->loadViewsFrom(__DIR__ . '/../Resources/views', '{$routeName}');
+        \$this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        \$this->mergeConfigFrom(__DIR__ . '/../config/config.php', '{$routeName}');
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        //
+    }
+}
+PHP;
         $this->files->put("{$modulePath}/Providers/{$name}ServiceProvider.php", $providerContent);
 
-        $configContent = "<?php\n
-        return [
-           'name' => '{$new_name}'\n];\n";
+        $configContent = <<<PHP
+<?php
+
+return [
+    'name' => '{$new_name}'
+];
+PHP;
         $this->files->put("{$modulePath}/config/config.php", $configContent);
 
-        $webRouteContent = "<?php\n
-        use Illuminate\\Support\\Facades\\Route;\n";
+        $webRouteContent = <<<PHP
+<?php
+
+use Illuminate\\Support\\Facades\\Route;
+
+// Định nghĩa route cho module tại đây
+PHP;
         $this->files->put("{$modulePath}/Routes/web.php", $webRouteContent);
 
-        $apiRouteContent = "<?php\n
-        use Illuminate\\Support\\Facades\\Route;\n";
+        $apiRouteContent = <<<PHP
+<?php
+
+use Illuminate\\Support\\Facades\\Route;
+
+// Định nghĩa route API cho module tại đây
+PHP;
         $this->files->put("{$modulePath}/Routes/api.php", $apiRouteContent);
 
         $moduleJsonContent = json_encode([
