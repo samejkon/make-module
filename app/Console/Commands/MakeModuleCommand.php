@@ -102,6 +102,7 @@ class MakeModuleCommand extends Command
 namespace Modules\\{$name}\\Providers;
 
 use Illuminate\\Support\\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class {$name}ServiceProvider extends ServiceProvider
 {
@@ -112,9 +113,13 @@ class {$name}ServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Nạp route, view, migration, config cho module
         \$this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
-        \$this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
+
+        Route::prefix('api')
+            ->middleware('api')
+            ->group(__DIR__ . '/../Routes/api.php');
+
+        // Load view, migration, config
         \$this->loadViewsFrom(__DIR__ . '/../Resources/views', '{$routeName}');
         \$this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         \$this->mergeConfigFrom(__DIR__ . '/../config/config.php', '{$routeName}');
